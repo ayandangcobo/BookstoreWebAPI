@@ -1,4 +1,4 @@
-Open solution # BookstoreWebAPI
+Open solution # BookstoreWebAPI					
 Run the API Project
 Navigate to {baseURL}/swagger
 Execute the Register endpoint using your credentials
