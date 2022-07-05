@@ -111,8 +111,6 @@ namespace BookStoreDomain.Implementation
         {
             var response = new RetVal<BookViewModel>();
             var repo = _uow.GetRepo<Book>();
-
-            response.IsSuccess = true;
             var book = repo.GetByIQuerable(b => b.BookId == id).FirstOrDefault();
 
             if (book != null)

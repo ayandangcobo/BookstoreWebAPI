@@ -32,6 +32,7 @@ namespace BookstoreWebAPI.Tests.Controllers
         {
             _uow = new BookStoreUnitOfWork(new BookStoreEntities());
             _authToken = new UserAuthToken();
+            _roleManager = new RoleManager(_uow);
             _auth = new UserAuth(_uow, _authToken, _roleManager);
             _permissions = new Permission(_uow, _authToken);
             _books = new Books(_uow, _authToken, _permissions);
@@ -81,8 +82,7 @@ namespace BookstoreWebAPI.Tests.Controllers
         public void can_retrieve_book_list()
         {
             BooksController controller = new BooksController(_books);
-            var actionResult = controller.GetBookDetail(1);
-
+            var actionResult = controller.GetBooks();
             var contentResult = actionResult as OkNegotiatedContentResult<RetVal<BookViewModel>>;
 
             // Assert
@@ -93,15 +93,18 @@ namespace BookstoreWebAPI.Tests.Controllers
 
         public void can_retrieve_book_detail()
         {
-            BooksController controller = new BooksController(_books);
-            var actionResult = controller.GetBookDetail(1);
+            var controller = new BooksController(_books);
+            var bookActionResult = controller.GetBooks();
+            var bookContentResult = bookActionResult as OkNegotiatedContentResult<RetVal<BookViewModel>>;
+            var book = bookContentResult.Content.results.FirstOrDefault();
 
+            var actionResult = controller.GetBookDetail(book.BookId);
             var contentResult = actionResult as OkNegotiatedContentResult<RetVal<BookViewModel>>;
-
+            
             // Assert
             Assert.IsNotNull(contentResult);
             Assert.IsNotNull(contentResult.Content);
-            Assert.AreEqual(1, contentResult.Content.results?.FirstOrDefault().BookId);
+            Assert.AreEqual(book.BookId, contentResult.Content.results?.FirstOrDefault().BookId);
 
         }
     }

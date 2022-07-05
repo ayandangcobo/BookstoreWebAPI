@@ -6,6 +6,11 @@ using BookStoreDomain.Contracts;
 using BookStoreDomain.Implementation;
 using Data;
 using BookStoreDomain.Models;
+using BookstoreWebAPI.Controllers;
+using System.Web.Http.Results;
+using BookStoreDomain;
+using System.Linq;
+using System.Net;
 
 namespace BookstoreWebAPI.Tests.Controllers
 {
@@ -20,11 +25,15 @@ namespace BookstoreWebAPI.Tests.Controllers
         private readonly IUserRoleManager _roleManager;
         private readonly IUserAuthToken _authToken;
 
+
         public AuthControllerTest()
         {
             _uow = new BookStoreUnitOfWork(new BookStoreEntities());
             _authToken = new UserAuthToken();
+            _roleManager = new RoleManager(_uow);
             _auth = new UserAuth(_uow, _authToken, _roleManager);
+
+            
         }
 
 
@@ -73,31 +82,51 @@ namespace BookstoreWebAPI.Tests.Controllers
         {
             var result = _auth.RegisterUser(new UserRegistrationViewModel());
             Assert.IsFalse(result.IsSuccess);
+            Assert.IsTrue(result.errors.Any());
+
+            //var controller = new AuthController(_auth, _roleManager);
+            //var ActionResult = controller.Register(new UserRegistrationViewModel());
+            //var ContentResult = ActionResult as OkNegotiatedContentResult<RetVal<string>>;
+
+            //Assert.IsFalse(ContentResult.Content.IsSuccess);
+            //Assert.IsInstanceOfType(ActionResult, typeof(BadRequestResult));
         }
 
         [TestMethod]
         public void can_register_wookie_to_store()
         {
-            var result = _auth.RegisterUser(new UserRegistrationViewModel
+            int randomVal = 0;
+            randomVal = new Random().Next();
+            var controller = new AuthController(_auth, _roleManager);
+            var ActionResult = controller.Register(new UserRegistrationViewModel
             {
-                Username = $"testuser@wookie.com",
-                AuthorPseudonym = $"Bruce Wayne",
+                Username = $"testuser{randomVal}@wookie.com",
+                AuthorPseudonym = $"Test{randomVal}",
                 Password = "1234",
                 ConfirmPassword = "1234"
             });
-            Assert.IsTrue(result.IsSuccess);
+            var ContentResult = ActionResult as OkNegotiatedContentResult<RetVal<string>>;
+
+            Assert.IsTrue(ContentResult.Content.IsSuccess);
+            Assert.IsFalse(ContentResult.Content.errors.Any());
+
+
+
         }
 
         [TestMethod]
         public void ensure_only_registered_wookies_can_get_token()
         {
-            var login = _auth.AuthUser(new UserLoginViewModel
+
+            var controller = new AuthController(_auth, _roleManager);
+            var ActionResult = controller.Login(new UserLoginViewModel
             {
                 Username = $"testuser@wookie.com",
                 Password = "1234",
             });
+            var ContentResult = ActionResult as OkNegotiatedContentResult<string>;
+            Assert.IsNotNull(ContentResult.Content);
 
-            Assert.IsTrue(login.IsSuccess);
         }
 
 
