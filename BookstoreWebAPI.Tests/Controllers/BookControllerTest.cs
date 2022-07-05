@@ -101,7 +101,7 @@ namespace BookstoreWebAPI.Tests.Controllers
             // Assert
             Assert.IsNotNull(contentResult);
             Assert.IsNotNull(contentResult.Content);
-            Assert.AreEqual(1, contentResult.Content.results?.FirstOrDefault().BookId));
+            Assert.AreEqual(1, contentResult.Content.results?.FirstOrDefault().BookId);
 
         }
     }
